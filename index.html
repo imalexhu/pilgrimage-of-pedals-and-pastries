@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sweet Treats and Quality Time🎆</title>
+    
+    <!-- React -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- GSAP for animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <!-- Three.js for fireworks -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Leaflet for map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --pink: #ffb3d9;
+            --peach: #ffd4a3;
+            --blue: #b3d9ff;
+            --cream: #fff9f0;
+            --text-dark: #4a4a4a;
+            --text-light: #6b6b6b;
+        }
+
+        body {
+            font-family: 'Georgia', 'Palatino', 'Times New Roman', serif;
+            background: linear-gradient(135deg, var(--pink) 0%, var(--peach) 50%, var(--blue) 100%);
+            color: var(--text-dark);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        .app-container {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            position: relative;
+            background: linear-gradient(135deg, var(--pink) 0%, var(--peach) 50%, var(--blue) 100%);
+        }
+
+        @media (min-width: 481px) {
+            body {
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+                background: #e5e5e5;
+            }
+            
+            .app-container {
+                box-shadow: 0 0 40px rgba(0, 0, 0, 0.2);
+                margin-top: 20px;
+                margin-bottom: 20px;
+            }
+        }
+
+        /* Progress Bar */
+        .progress-bar-container {
+            position: sticky;
+            top: 0;
+            background: rgba(255, 249, 240, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            z-index: 100;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            border-bottom: 2px solid rgba(255, 179, 217, 0.3);
+        }
+
+        .progress-track {
+            height: 12px;
+            background: rgba(255, 179, 217, 0.2);
+            border-radius: 20px;
+            position: relative;
+            overflow: visible;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--pink), var(--peach), var(--blue));
+            border-radius: 20px;
+            position: relative;
+            transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 10px rgba(255, 179, 217, 0.5);
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .bike-container {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            transition: left 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: drop-shadow(0 3px 6px rgba(255, 107, 157, 0.4));
+        }
+
+        .bike-icon {
+            font-size: 38px;
+            animation: bikeBounce 1s ease-in-out infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: scaleX(-1);
+        }
+
+        @keyframes bikeBounce {
+            0%, 100% { transform: scaleX(-1) translateY(0); }
+            50% { transform: scaleX(-1) translateY(-4px); }
+        }
+
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: var(--text-light);
+            margin-top: 10px;
+        }
+
+        .progress-percentage {
+            font-weight: bold;
+            color: var(--pink);
+            font-size: 16px;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px 20px;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.3), transparent);
+        }
+
+        .hero-title {
+            font-size: 48px;
+            margin-bottom: 30px;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .hero-subtitle {
+            font-size: 18px;
+            line-height: 1.8;
+            max-width: 400px;
+            margin: 0 auto 40px;
+            font-style: italic;
+            color: var(--text-light);
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Password Gate */
+        .password-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 249, 240, 0.98);
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @media (min-width: 481px) {
+            .password-overlay {
+                left: 50%;
+                transform: translateX(-50%);
+                max-width: 480px;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .password-card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            max-width: 350px;
+            width: 90%;
+            animation: scaleIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .password-card.shake {
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .password-title {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .password-hint {
+            color: var(--text-light);
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        .password-input {
+            width: 80px;
+            height: 60px;
+            font-size: 32px;
+            text-align: center;
+            border: 2px solid var(--pink);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            font-family: inherit;
+        }
+
+        .password-input:focus {
+            outline: none;
+            border-color: var(--peach);
+            box-shadow: 0 0 0 3px rgba(255, 179, 217, 0.2);
+        }
+
+        /* Buttons */
+        .btn {
+            background: linear-gradient(135deg, var(--pink), var(--peach));
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 179, 217, 0.4);
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 179, 217, 0.6);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        /* Map Section */
+        .map-section {
+            padding: 40px 20px;
+            background: white;
+            margin: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .map-container {
+            height: 400px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .stop-description {
+            background: var(--cream);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--pink);
+            animation: slideInRight 0.5s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .stop-description h3 {
+            margin-bottom: 10px;
+            color: var(--pink);
+        }
+
+        /* Section Pages */
+        .section-container {
+            padding: 20px;
+            padding-bottom: 100px;
+        }
+
+        .section-header {
+            text-align: center;
+            padding: 30px 0;
+            font-size: 24px;
+            color: var(--text-dark);
+        }
+
+        /* Cards */
+        .location-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .card-image-placeholder {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, var(--pink), var(--peach));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 140px;
+        }
+
+        .card-content {
+            padding: 25px;
+        }
+
+        .card-title {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: var(--text-dark);
+        }
+
+        .card-vibe {
+            font-style: italic;
+            color: var(--text-light);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .card-recommendations {
+            margin: 20px 0;
+        }
+
+        .card-recommendations h4 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: var(--pink);
+        }
+
+        .card-recommendations ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .card-recommendations li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .card-recommendations li::before {
+            content: '•';
+            position: absolute;
+            left: 8px;
+            color: var(--pink);
+            font-size: 20px;
+        }
+
+        .maps-link {
+            display: inline-block;
+            color: var(--pink);
+            text-decoration: none;
+            font-weight: bold;
+            padding: 10px 20px;
+            border: 2px solid var(--pink);
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .maps-link:hover {
+            background: var(--pink);
+            color: white;
+        }
+
+        .cycling-info {
+            text-align: center;
+            padding: 20px;
+            background: var(--cream);
+            border-radius: 15px;
+            margin: 20px 0;
+            font-size: 15px;
+            color: var(--text-light);
+        }
+
+        .cycling-info strong {
+            color: var(--pink);
+            font-size: 18px;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        /* Navigation */
+        .nav-buttons {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        /* Fireworks Canvas */
+        #fireworks-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            background: linear-gradient(180deg, #0a1128 0%, #1a2650 100%);
+        }
+
+        .fireworks-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10000;
+            text-align: center;
+            color: white;
+            font-size: 24px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            animation: messageAppear 2s ease-out 3s forwards;
+        }
+
+        @keyframes messageAppear {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .replay-button {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10000;
+            opacity: 0;
+            animation: messageAppear 1s ease-out 5s forwards;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .hero-title {
+                font-size: 36px;
+            }
+            .hero-subtitle {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // Journey Data
+        const journeyData = {
+            totalDistance: "52.6km",
+            totalTime: "3h 15min",
+            stops: [
+                {
+                    id: "start",
+                    name: "Toda-Kōen Station",
+                    coords: [35.8097, 139.6773],
+                    description: "Where all good things start, Toda ;)",
+                    type: "start",
+                    emoji: "🚉"
+                },
+                {
+                    id: "pupolu",
+                    name: "Bakery Pupolu",
+                    coords: [35.7860, 139.6903],
+                    type: "bakery",
+                    description: "Charming neighborhood bakery with over 50 varieties of fresh-baked breads and pastries, including their famous limited-edition Maple Walnut Shokupan",
+                    emoji: "🥐"
+                },
+                {
+                    id: "akabane-park",
+                    name: "Akabane Sakuratsutsumi Park",
+                    coords: [35.7878, 139.7225],
+                    type: "park",
+                    description: "A peaceful riverside path where fall colors paint the Arakawa banks and the autumn breeze carries away the city noise",
+                    emoji: "🍂"
+                },
+                {
+                    id: "furansuya",
+                    name: "ふらんすや (Furansuya)",
+                    coords: [35.7492, 139.8043],
+                    type: "bakery",
+                    description: "A beloved retro bakery marked by its iconic pink bear sign, where handmade breads are crafted with 100% Hokkaido wheat and zero additives—famous enough to appear in TV dramas",
+                    emoji: "🥐"
+                },
+                {
+                    id: "shioiri",
+                    name: "Shioiri Park",
+                    coords: [35.7363, 139.7987],
+                    type: "park",
+                    description: "A tranquil waterfront oasis where the Sumida River reflects autumn skies and herb gardens still bloom with late-season flowers",
+                    emoji: "🌳"
+                },
+                {
+                    id: "lyon",
+                    name: "Lyon Étoile",
+                    coords: [35.7142, 139.8467],
+                    type: "bakery",
+                    description: "A bustling neighborhood favorite with 50+ varieties where German ovens create 'Étoile' (star)-quality breads that keep locals coming back",
+                    emoji: "🥐"
+                },
+                {
+                    id: "ojima",
+                    name: "Ojima-Komatsugawa Park",
+                    coords: [35.7065, 139.8519],
+                    type: "park",
+                    description: "Tokyo's hidden treasure where over 1,000 bare cherry trees stand like silent sentinels along the Arakawa, their autumn branches waiting for spring's return",
+                    emoji: "🍂"
+                },
+                {
+                    id: "dudestin",
+                    name: "Boulangerie Dudestin",
+                    coords: [35.6707, 139.9082],
+                    type: "bakery",
+                    description: "World champion bakery where award-winning chef Takuya Sasaki creates over 70 varieties of artisan bread, from his gold-medal Viennoiserie to perfectly crafted Japanese favorites",
+                    emoji: "🥐"
+                },
+                {
+                    id: "kasai",
+                    name: "Kasai Rinkai Park",
+                    coords: [35.6454, 139.8585],
+                    type: "end",
+                    description: "The grand waterfront finale where a giant Ferris wheel spins against November's crisp blue sky, and Tokyo Bay sparkles with the promise of fireworks to come",
+                    emoji: "🎡"
+                }
+            ],
+     
+            sections: [
+                {
+                    id: 1,
+                    password: "A",
+                    bakery: {
+                        name: "Bakery Pupolu",
+                        address: "3-19-9 Akabanekita, Kita City, Tokyo",
+                        vibe: "Charming neighborhood bakery with over 50 varieties of fresh-baked breads and pastries, including their famous limited-edition Maple Walnut Shokupan—opened by the daughter of Asaka Bakery's owner",
+                        recommendations: ["Maple Walnut Shokupan (3/day limit!)", "Jou-shoku (Premium Shokupan)", "Shiomame Butter", "Teriyaki Chicken", "Custard Walnut"],
+                        mapsLink: "https://www.google.com/maps/search/?api=1&query=35.7860,139.6903",
+                        openingHours: "7:30 AM - Sold Out",
+                        closedDays: "Closed Monday & Tuesday (Open Sundays!)",
+                        imageUrl: "https://lh3.googleusercontent.com/p/AF1QipO3YMguAMPQOiiJy2nHBs7awKgSRWrjHJwt--My=w408-h544-k-no" // 👈 ADD BAKERY PUPOLU IMAGE URL HERE
+                    },
+                    restStop: {
+                        name: "Akabane Sakuratsutsumi Park",
+                        vibe: "A peaceful riverside path where fall colors paint the Arakawa banks and the autumn breeze carries away the city noise",
+                        mapsLink: "https://www.google.com/maps/search/?api=1&query=35.7878,139.7225",
+                        openingHours: "Open 24 hours",
+                        imageUrl: "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSwRboganmHb4VC50pKPO4haJrzWcAPFrVSEwBjM1u5_6cjF0K8pNNSizMA4MLtkGyUj4UR6me9ndJwLOIY2kLlvhgumHYGzmZzfdY47bP18gHjq-3mQcMA2rW2Q9Y7ls76LHx0=w408-h306-k-no" // 👈 ADD AKABANE PARK IMAGE URL HERE
+                    },
+                    cyclingTimes: {
+                        toRestStop: "~8 min",
+                        toRestStopKm: "3.0 km",
+                        toNextBakery: "~35 min",
+                        toNextBakeryKm: "10.5 km"
+                    }
+                },
+                {
+                    id: 2,
+                    password: "N",
+                    bakery: {
+                        name: "ふらんすや (Furansuya)",
+                        address: "3-55 Senju, Adachi-ku, Tokyo",
+                        vibe: "A beloved retro bakery marked by its iconic pink bear sign, where handmade breads are crafted with 100% Hokkaido wheat and zero additives—famous enough to appear in TV dramas",
+                        recommendations: ["Additive-Free Shokupan", "Furansuya Burger", "Yakisoba Pan (TV drama famous!)", "Anpan", "Cream Pan"],
+                        mapsLink: "https://www.google.com/maps/search/?api=1&query=35.7492,139.8043",
+                        openingHours: "8:00 AM - 7:00 PM",
+                        closedDays: "Open Daily (Open Sundays!)",
+                        imageUrl: "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSz9JYJLrLTGsaiiJR0LkVZbruP4PUsQUiX9v1to8T2i9Q1UyLcMpxUQEQRp8H_1f0OeBFvHTccb76_FNP6ih_olW8PqnIIEk81DVScDn5MnbDJocVrsEnbDkk28tjFAjStQV8gDog=w344-h448-p-k-no" // 👈 ADD FURANSUYA IMAGE URL HERE
+                    },
+                    restStop: {
+                        name: "Shioiri Park",
+                        vibe: "A tranquil waterfront oasis where the Sumida River reflects autumn skies and herb gardens still bloom with late-season flowers",
+                        mapsLink: "https://www.google.com/maps/search/?api=1&query=35.7363,139.7987",
+                        openingHours: "Open 24 hours",
+                        imageUrl: "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSzHy-_MTdYEyS5jDw_PEZQiG-C8KO6IID-A4-gpSywgg_nfzj8gwXEQ7P2r_tOmbGxn929bFTtXGUe-ZaleBN1btdYKpE9pEo8lRfwFkaCUmj6gLWguQiyv1dLLyZ4ktFyR4260=w408-h306-k-no" // 👈 ADD SHIOIRI PARK IMAGE URL HERE
+                    },
+                    cyclingTimes: {
+                        toRestStop: "~10 min",
+                        toRestStopKm: "3.2 km",
+                        toNextBakery: "~20 min",
+                        toNextBakeryKm: "6.8 km"
+                    }
+                },
+                {
+                    id: 3,
+                    password: "A",
+                    bakery: {
+                        name: "Lyon Étoile",
+                        address: "1-2-19 Hirai, Edogawa City",
+                        vibe: "A bustling neighborhood favorite with 50+ varieties where German ovens create 'Étoile' (star)-quality breads that keep locals coming back",
+                        recommendations: ["Shio Roll Pan (crowd favorite!)", "Shiawase no Cream Pan", "Curry Pan", "Mentaiko France", "Korokke Coppe"],
+                        mapsLink: "https://www.google.com/maps/search/?api=1&query=35.7142,139.8467",
+                        openingHours: "7:00 AM - 7:00 PM",
+                        closedDays: "Open Daily",
+                        imageUrl: "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSwzSKguJHC6dOeP0-HPRKbFTU_QBOq-Mr01prjV3VrO4E2T2US2hKQ2l2JEGZsBAlDO1gV7dZq5gncQNEMIy_KNuG8sFxbInjySQzoDw0SQlvIY1xg4Pc6eTQI3o0Y7tlbu_Hc=w408-h306-k-no" // 👈 ADD LYON ÉTOILE IMAGE URL HERE
+                    },
+                    restStop: {
+                        name: "Ojima-Komatsugawa Park",
+                        vibe: "Tokyo's hidden treasure where over 1,000 bare cherry trees stand like silent sentinels along the Arakawa, their autumn branches waiting for spring's return",
+                        mapsLink: "https://www.google.com/maps/search/?api=1&query=35.7065,139.8519",
+                        openingHours: "Open 24 hours",
+                        imageUrl: "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSyIYv9_OFFiu40p_-2uFAblhTPrgN5B7nPHxG4dkW_mLYoQ2Yf5V25JSVzhzgAY4vxsDNH0QF6Zz5rovZxJQBsdKOX2iDBAO12mAJVRMaobUTGtiDU1Km3XVh-tZbKfHy0xtRrx=w408-h270-k-no" // 👈 ADD OJIMA PARK IMAGE URL HERE
+                    },
+                    cyclingTimes: {
+                        toRestStop: "~7 min",
+                        toRestStopKm: "2.2 km",
+                        toNextBakery: "~20 min",
+                        toNextBakeryKm: "7.0 km"
+                    }
+                },
+                {
+                    id: 4,
+                    password: "B",
+                    bakery: {
+                        name: "Boulangerie Dudestin",
+                        address: "3-6-20 Tomihama, Ichikawa City, Chiba",
+                        vibe: "World champion bakery where award-winning chef Takuya Sasaki creates over 70 varieties of artisan bread, from his gold-medal Viennoiserie to perfectly crafted Japanese favorites",
+                        recommendations: ["Cinnamon BOX (signature)", "Shokupan (milk bread)", "Graham Fig", "Croissant", "Seasonal Danish"],
+                        mapsLink: "https://www.google.com/maps/search/?api=1&query=35.6707,139.9082",
+                        openingHours: "9:00 AM - Sold Out",
+                        closedDays: "Closed Monday & Tuesday (Open Sundays!)",
+                        imageUrl: "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSxF6kX78GqC_7fy3Kqh1wINQlDgZFUUVCiyJ5GdIzUKGcR2z1VhFbScejhUjfBGNiq1HSw7TZzWU69iXknod-7wSENh4CjtKX44Kj4nT-NTlYNLx9Hi7lJFsmKiUv3sh3pZNU0=w224-h224-p-k-no" // 👈 ADD DUDESTIN IMAGE URL HERE
+                    },
+                    restStop: {
+                        name: "Final Stretch to Kasai",
+                        vibe: "Cruising along the waterfront towards the grand finale with Tokyo Bay in view",
+                        mapsLink: "https://www.google.com/maps/search/?api=1&query=35.6454,139.8585",
+                        openingHours: "Open 24 hours",
+                        imageUrl: "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSwAspyrf3i5l_N1DIPK24ETYZy0H2RuzFIpHVIwh7kD7jfoF7tIulJpNCEhc9PWJgxjkLq3xQEMUe1vqEAY16MDI0HoshY6G_wINmwyQPW6m5qh-W0PSd8088FFGFfngcMxObiTbw=w408-h306-k-no" // 👈 ADD WATERFRONT IMAGE URL HERE
+                    },
+                    cyclingTimes: {
+                        toRestStop: "~5 min",
+                        toRestStopKm: "1.5 km",
+                        toNextBakery: "~25 min",
+                        toNextBakeryKm: "8.4 km"
+                    }
+                }
+            ],
+            finalDestination: {
+                name: "Kasai Rinkai Park",
+                vibe: "The grand waterfront finale where a giant Ferris wheel spins against November's crisp blue sky, and Tokyo Bay sparkles with the promise of fireworks to come",
+                mapsLink: "https://www.google.com/maps/search/?api=1&query=35.6454,139.8585",
+                imageUrl: "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSwAspyrf3i5l_N1DIPK24ETYZy0H2RuzFIpHVIwh7kD7jfoF7tIulJpNCEhc9PWJgxjkLq3xQEMUe1vqEAY16MDI0HoshY6G_wINmwyQPW6m5qh-W0PSd8088FFGFfngcMxObiTbw=w408-h306-k-no" // 👈 ADD KASAI RINKAI PARK IMAGE URL HERE
+            }
+        };
+
+        // Progress Bar Component
+        function ProgressBar({ progress, currentSection }) {
+            const bikeRef = useRef(null);
+
+            useEffect(() => {
+                if (bikeRef.current) {
+                    gsap.to(bikeRef.current, {
+                        left: `${progress}%`,
+                        duration: 1.5,
+                        ease: "power2.out"
+                    });
+                }
+            }, [progress]);
+
+            const remaining = (52.6 * (1 - progress / 100)).toFixed(1);
+
+            return (
+                <div className="progress-bar-container">
+                    <div className="progress-track">
+                        <div className="progress-fill" style={{ width: `${progress}%` }} />
+                        <div ref={bikeRef} className="bike-container" style={{ left: `${progress}%` }}>
+                            <div className="bike-icon">🚴‍♀️</div>
+                        </div>
+                    </div>
+                    <div className="progress-stats">
+                        <span className="progress-percentage">{Math.round(progress)}% Complete</span>
+                        <span>{remaining}km remaining</span>
+                    </div>
+                </div>
+            );
+        }
+
+        // Password Gate Component
+        function PasswordGate({ expectedPassword, onUnlock }) {
+            const [input, setInput] = useState('');
+            const [shake, setShake] = useState(false);
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (input.toUpperCase() === expectedPassword.toUpperCase()) {
+                    onUnlock();
+                } else {
+                    setShake(true);
+                    setTimeout(() => setShake(false), 500);
+                    setInput('');
+                }
+            };
+
+            return (
+                <div className="password-overlay">
+                    <form onSubmit={handleSubmit}>
+                        <div className={`password-card ${shake ? 'shake' : ''}`}>
+                            <div className="password-title">Password Required 🔐</div>
+                            <input
+                                type="text"
+                                className="password-input"
+                                value={input}
+                                onChange={(e) => setInput(e.target.value)}
+                                placeholder=""
+                                maxLength="1"
+                                autoFocus
+                            />
+                            <div style={{ fontSize: '12px', color: 'var(--text-light)', marginBottom: '15px' }}>
+                                Enter the secret letter to continue
+                            </div>
+                            <button type="submit" className="btn">UNLOCK</button>
+                        </div>
+                    </form>
+                </div>
+            );
+        }
+
+        // Start Page
+        function StartPage({ onNext }) {
+            const [showPassword, setShowPassword] = useState(false);
+            const [currentStopIndex, setCurrentStopIndex] = useState(0);
+            const [revealedStops, setRevealedStops] = useState([0]);
+            const mapRef = useRef(null);
+            const mapInstanceRef = useRef(null);
+            const markersRef = useRef([]);
+            const mapSectionRef = useRef(null);
+            const descriptionRef = useRef(null);
+
+            const scrollToMap = () => {
+                mapSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            };
+
+            useEffect(() => {
+                if (mapRef.current && !mapInstanceRef.current) {
+                    const map = L.map(mapRef.current, {
+                        zoomControl: false,
+                        dragging: false,
+                        scrollWheelZoom: false,
+                        doubleClickZoom: false,
+                        touchZoom: false
+                    }).setView([35.7300, 139.7800], 11);
+
+                    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                        attribution: '© OpenStreetMap'
+                    }).addTo(map);
+
+                    const routeCoords = journeyData.stops.map(stop => stop.coords);
+                    L.polyline(routeCoords, {
+                        color: '#ff6b9d',
+                        weight: 4,
+                        opacity: 0.7,
+                    }).addTo(map);
+
+                    journeyData.stops.forEach((stop, index) => {
+                        const icon = L.divIcon({
+                            html: `
+                                <div style="position: relative; width: 60px; height: 60px;">
+                                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 30px; height: 30px; background: #ff6b9d; border-radius: 50%;"></div>
+                                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 24px; color: white; font-weight: bold; z-index: 1;">?</div>
+                                </div>
+                            `,
+                            className: '',
+                            iconSize: [60, 60]
+                        });
+                        const marker = L.marker(stop.coords, { icon }).addTo(map);
+                        markersRef.current.push(marker);
+                    });
+
+                    mapInstanceRef.current = map;
+                }
+            }, []);
+
+            useEffect(() => {
+                if (mapInstanceRef.current && currentStopIndex >= 0 && markersRef.current[currentStopIndex]) {
+                    const stop = journeyData.stops[currentStopIndex];
+                    mapInstanceRef.current.setView(stop.coords, currentStopIndex === 0 ? 11 : 13, { animate: true, duration: 1 });
+                    
+                    const icon = L.divIcon({
+                        html: `
+                            <div style="position: relative; width: 60px; height: 60px;">
+                                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 30px; height: 30px; background: #ff6b9d; border-radius: 50%;"></div>
+                                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 50px; z-index: 1;">${stop.emoji}</div>
+                            </div>
+                        `,
+                        className: '',
+                        iconSize: [60, 60]
+                    });
+                    markersRef.current[currentStopIndex].setIcon(icon);
+                }
+            }, [currentStopIndex]);
+
+            useEffect(() => {
+                if (currentStopIndex > 0 && descriptionRef.current) {
+                    setTimeout(() => {
+                        descriptionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 500);
+                }
+            }, [currentStopIndex]);
+
+            const handleNext = () => {
+                if (currentStopIndex < journeyData.stops.length - 1) {
+                    const nextIndex = currentStopIndex + 1;
+                    setCurrentStopIndex(nextIndex);
+                    setRevealedStops([...revealedStops, nextIndex]);
+                } else {
+                    setShowPassword(true);
+                }
+            };
+
+            if (showPassword) {
+                return <PasswordGate 
+                    expectedPassword="H" 
+                    onUnlock={onNext}
+                />;
+            }
+
+            const currentStop = journeyData.stops[currentStopIndex];
+
+            return (
+                <div>
+                    <div className="hero-section">
+                        <h1 className="hero-title">🚴‍♀️ Sweet Treats and Quality Time 🎆</h1>
+                        <p className="hero-subtitle">
+                            "A cute, unexpectedly well planned date, schemed up by a true yearner that only you know"
+                        </p>
+                        <button className="btn" onClick={scrollToMap}>
+                            NEXT →
+                        </button>
+                    </div>
+                    
+                    <div className="map-section" ref={mapSectionRef}>
+                        <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Our Journey</h2>
+                        <div className="map-container" ref={mapRef}></div>
+                        
+                        <div ref={descriptionRef}>
+                            {currentStopIndex === 0 ? (
+                                <div className="stop-description">
+                                    <h3>🚉 Starting Point</h3>
+                                    <p>{currentStop.description}</p>
+                                </div>
+                            ) : currentStopIndex === journeyData.stops.length - 1 ? (
+                                <div className="stop-description">
+                                    <h3>{currentStop.emoji} Final Stop</h3>
+                                    <p>{currentStop.description}</p>
+                                </div>
+                            ) : (
+                                <div className="stop-description">
+                                    <h3>{currentStop.emoji} Stop {currentStopIndex}</h3>
+                                    <p>{currentStop.description}</p>
+                                </div>
+                            )}
+                        </div>
+                        
+                        <div style={{ textAlign: 'center', marginTop: '20px' }}>
+                            <p style={{ marginBottom: '15px', color: '#6b6b6b' }}>
+                                {currentStopIndex === 0 ? 'Tap NEXT to reveal each stop' : `Stop ${currentStopIndex} of ${journeyData.stops.length - 1}`}
+                            </p>
+                            <button className="btn" onClick={handleNext}>
+                                {currentStopIndex < journeyData.stops.length - 1 ? 'NEXT STOP →' : 'START JOURNEY'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Location Card
+        function LocationCard({ name, vibe, recommendations, mapsLink, emoji, openingHours, closedDays, imageUrl }) {
+            const [imgError, setImgError] = useState(false);
+            
+            return (
+                <div className="location-card">
+                    <div className="card-image-placeholder">
+                        {imageUrl && !imgError ? (
+                            <img 
+                                src={imageUrl} 
+                                alt={name}
+                                onError={() => setImgError(true)}
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'cover'
+                                }}
+                            />
+                        ) : (
+                            <span>{emoji}</span>
+                        )}
+                    </div>
+                    <div className="card-content">
+                        <h2 className="card-title">{name}</h2>
+                        <p className="card-vibe">"{vibe}"</p>
+                        
+                        {openingHours && (
+                            <div style={{ 
+                                background: 'var(--cream)', 
+                                padding: '12px 15px', 
+                                borderRadius: '10px', 
+                                margin: '15px 0',
+                                fontSize: '14px'
+                            }}>
+                                <div style={{ marginBottom: '5px' }}>
+                                    <strong style={{ color: 'var(--pink)' }}>⏰ Hours:</strong> {openingHours}
+                                </div>
+                                {closedDays && (
+                                    <div style={{ color: 'var(--text-light)', fontSize: '13px' }}>
+                                        {closedDays}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                        
+                        {recommendations && recommendations.length > 0 && (
+                            <div className="card-recommendations">
+                                <h4>Recommendations:</h4>
+                                <ul>
+                                    {recommendations.map((item, index) => (
+                                        <li key={index}>{item}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                        
+                        <a href={mapsLink} target="_blank" rel="noopener noreferrer" className="maps-link">
+                            📍 Open in Google Maps
+                        </a>
+                    </div>
+                </div>
+            );
+        }
+
+        // Section Page
+        function SectionPage({ section, onNext, progress }) {
+            const [showPassword, setShowPassword] = useState(false);
+
+            const handleUnlock = () => {
+                onNext();
+            };
+
+            if (showPassword) {
+                return (
+                    <>
+                        <ProgressBar progress={progress} />
+                        <PasswordGate 
+                            expectedPassword={section.password}
+                            onUnlock={handleUnlock}
+                        />
+                    </>
+                );
+            }
+
+            return (
+                <>
+                    <ProgressBar progress={progress} />
+                    <div className="section-container">
+                        <div className="section-header">— STOP {section.id} —</div>
+                        
+                        <LocationCard 
+                            name={section.bakery.name}
+                            vibe={section.bakery.vibe}
+                            recommendations={section.bakery.recommendations}
+                            mapsLink={section.bakery.mapsLink}
+                            emoji="🥐"
+                            openingHours={section.bakery.openingHours}
+                            closedDays={section.bakery.closedDays}
+                            imageUrl={section.bakery.imageUrl}
+                        />
+                        
+                        <div className="cycling-info">
+                            <strong>🚴 {section.cyclingTimes.toRestStop}</strong>
+                            <div>{section.cyclingTimes.toRestStopKm}</div>
+                        </div>
+                        
+                        <LocationCard 
+                            name={section.restStop.name}
+                            vibe={section.restStop.vibe}
+                            mapsLink={section.restStop.mapsLink}
+                            emoji={section.id === 2 ? '🍂' : section.id === 3 ? '🥐' : '🌳'}
+                            openingHours={section.restStop.openingHours}
+                            closedDays={section.restStop.closedDays}
+                            imageUrl={section.restStop.imageUrl}
+                        />
+                        
+                        <div className="cycling-info">
+                            <strong>🚴 {section.cyclingTimes.toNextBakery}</strong>
+                            <div>{section.cyclingTimes.toNextBakeryKm}</div>
+                        </div>
+                    </div>
+                    
+                    <div className="nav-buttons">
+                        <button className="btn" onClick={() => setShowPassword(true)}>
+                            CONTINUE →
+                        </button>
+                    </div>
+                </>
+            );
+        }
+
+        // End Page with Fireworks
+        function EndPage() {
+            const [showPassword, setShowPassword] = useState(false);
+            const [showFireworks, setShowFireworks] = useState(false);
+            const canvasRef = useRef(null);
+            const animationRef = useRef(null);
+
+            useEffect(() => {
+                if (showFireworks && canvasRef.current) {
+                    launchFireworks();
+                }
+                return () => {
+                    if (animationRef.current) {
+                        cancelAnimationFrame(animationRef.current);
+                    }
+                };
+            }, [showFireworks]);
+
+            const launchFireworks = () => {
+                const canvas = canvasRef.current;
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+                const renderer = new THREE.WebGLRenderer({ canvas, alpha: false });
+                
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                camera.position.z = 5;
+
+                const particles = [];
+                const colors = [0xffb3d9, 0xffd4a3, 0xb3d9ff, 0xffffff, 0xffc0cb, 0xff69b4];
+
+                class Particle {
+                    constructor(x, y, z, color, speed = 1, size = 0.04) {
+                        const geometry = new THREE.SphereGeometry(size, 6, 6);
+                        const material = new THREE.MeshBasicMaterial({ color });
+                        this.mesh = new THREE.Mesh(geometry, material);
+                        this.mesh.position.set(x, y, z);
+                        
+                        const angle = Math.random() * Math.PI * 2;
+                        const vertAngle = (Math.random() - 0.5) * Math.PI;
+                        const particleSpeed = (Math.random() * 0.04 + 0.02) * speed;
+                        this.velocity = new THREE.Vector3(
+                            Math.cos(angle) * Math.cos(vertAngle) * particleSpeed,
+                            Math.sin(vertAngle) * particleSpeed,
+                            Math.sin(angle) * Math.cos(vertAngle) * particleSpeed * 0.3
+                        );
+                        this.gravity = -0.001 * speed;
+                        this.life = 1.0;
+                        
+                        scene.add(this.mesh);
+                    }
+
+                    update() {
+                        this.velocity.y += this.gravity;
+                        this.mesh.position.add(this.velocity);
+                        this.life -= 0.015;
+                        this.mesh.material.opacity = Math.max(0, this.life);
+                        this.mesh.material.transparent = true;
+                        return this.life > 0;
+                    }
+                }
+
+                // Different firework types
+                function createBurst(x, y, color, count = 100, speed = 1) {
+                    for (let i = 0; i < count; i++) {
+                        particles.push(new Particle(x, y, 0, color, speed, 0.04));
+                    }
+                }
+
+                function createRing(x, y, color, count = 60) {
+                    for (let i = 0; i < count; i++) {
+                        const angle = (i / count) * Math.PI * 2;
+                        const speed = 0.025;
+                        const particle = new Particle(x, y, 0, color, 1, 0.03);
+                        particle.velocity = new THREE.Vector3(
+                            Math.cos(angle) * speed,
+                            Math.sin(angle) * speed * 0.3,
+                            0
+                        );
+                        particles.push(particle);
+                    }
+                }
+
+                function createWillow(x, y, color, count = 80) {
+                    for (let i = 0; i < count; i++) {
+                        const angle = Math.random() * Math.PI * 2;
+                        const speed = Math.random() * 0.015 + 0.01;
+                        const particle = new Particle(x, y, 0, color, 0.8, 0.05);
+                        particle.velocity.y = speed;
+                        particle.gravity = -0.002;
+                        particles.push(particle);
+                    }
+                }
+
+                // Fast-paced spectacular sequence (5 seconds)
+                setTimeout(() => createBurst(-1.5, 1, colors[0], 120, 1.2), 200);
+                setTimeout(() => createBurst(1.5, 0.5, colors[1], 120, 1.2), 400);
+                setTimeout(() => createRing(0, 1.2, colors[2]), 600);
+                setTimeout(() => createBurst(-0.8, -0.3, colors[3], 100, 1), 800);
+                setTimeout(() => createBurst(0.8, 0.8, colors[4], 100, 1), 1000);
+                setTimeout(() => createWillow(0, 1.5, colors[0], 100), 1200);
+                setTimeout(() => {
+                    createBurst(-1.2, 0.5, colors[1], 130, 1.3);
+                    createBurst(1.2, -0.2, colors[2], 130, 1.3);
+                }, 1400);
+                setTimeout(() => createRing(-0.5, 0.8, colors[5]), 1600);
+                setTimeout(() => createRing(0.5, 0.2, colors[3]), 1700);
+                setTimeout(() => {
+                    createBurst(0, 1, colors[0], 150, 1.5);
+                    createBurst(-1, 0, colors[1], 120, 1.2);
+                    createBurst(1, 0.5, colors[2], 120, 1.2);
+                }, 2000);
+                setTimeout(() => createWillow(-1.5, 1, colors[3], 90), 2200);
+                setTimeout(() => createWillow(1.5, 0.8, colors[4], 90), 2300);
+                setTimeout(() => {
+                    createBurst(-0.5, -0.5, colors[5], 140, 1.4);
+                    createBurst(0.5, 1.2, colors[0], 140, 1.4);
+                }, 2600);
+                setTimeout(() => createRing(0, 0.5, colors[1]), 2900);
+                setTimeout(() => {
+                    // Grand finale
+                    createBurst(0, 1.5, colors[0], 180, 1.6);
+                    createBurst(-1.5, 0.5, colors[1], 150, 1.4);
+                    createBurst(1.5, 0.8, colors[2], 150, 1.4);
+                    createBurst(0, -0.3, colors[3], 150, 1.4);
+                    createRing(-0.8, 1, colors[4]);
+                    createRing(0.8, 0.3, colors[5]);
+                }, 3200);
+
+                function animate() {
+                    animationRef.current = requestAnimationFrame(animate);
+                    
+                    for (let i = particles.length - 1; i >= 0; i--) {
+                        if (!particles[i].update()) {
+                            scene.remove(particles[i].mesh);
+                            particles.splice(i, 1);
+                        }
+                    }
+                    
+                    renderer.render(scene, camera);
+                }
+                
+                animate();
+            };
+
+            const handleReplay = () => {
+                if (animationRef.current) {
+                    cancelAnimationFrame(animationRef.current);
+                }
+                setShowFireworks(false);
+                setTimeout(() => setShowFireworks(true), 100);
+            };
+
+            const handleUnlockFireworks = () => {
+                setShowPassword(false);
+                setTimeout(() => setShowFireworks(true), 500);
+            };
+
+            // Show password gate
+            if (showPassword && !showFireworks) {
+                return (
+                    <>
+                        <ProgressBar progress={100} />
+                        <PasswordGate 
+                            expectedPassword="I"
+                            onUnlock={handleUnlockFireworks}
+                        />
+                    </>
+                );
+            }
+
+            // Show fireworks
+            if (showFireworks) {
+                return (
+                    <>
+                        <canvas ref={canvasRef} id="fireworks-canvas"></canvas>
+                        <div className="fireworks-message">
+                            Thank you for joining me<br/>on this journey 💕
+                        </div>
+                        <button className="btn replay-button" onClick={handleReplay}>
+                            REPLAY FIREWORKS
+                        </button>
+                    </>
+                );
+            }
+
+            // Show final destination page (default)
+            return (
+                <>
+                    <ProgressBar progress={100} />
+                    <div className="section-container">
+                        <div className="section-header">— FINAL DESTINATION —</div>
+                        
+                        <LocationCard 
+                            name={journeyData.finalDestination.name}
+                            vibe={journeyData.finalDestination.vibe}
+                            mapsLink={journeyData.finalDestination.mapsLink}
+                            emoji="🎡"
+                            imageUrl={journeyData.finalDestination.imageUrl}
+                        />
+                        
+                        <div style={{ textAlign: 'center', marginTop: '40px', padding: '20px' }}>
+                            <h2 style={{ marginBottom: '20px', fontSize: '28px' }}>We made it! 🎆</h2>
+                            <p style={{ marginBottom: '30px', color: 'var(--text-light)', fontStyle: 'italic' }}>
+                                Ready for the finale?
+                            </p>
+                            <button className="btn" onClick={() => setShowPassword(true)}>
+                                CONTINUE TO FINALE →
+                            </button>
+                        </div>
+                    </div>
+                </>
+            );
+        }
+
+        // Main App
+        function App() {
+            const [currentPage, setCurrentPage] = useState('start');
+            const [currentSection, setCurrentSection] = useState(0);
+
+            const progressMap = {
+                'start': 0,
+                'section-1': 20,
+                'section-2': 40,
+                'section-3': 60,
+                'section-4': 80,
+                'end': 100
+            };
+
+            const handleStart = () => {
+                setCurrentPage('section-1');
+                setCurrentSection(1);
+            };
+
+            const handleNextSection = () => {
+                const nextSection = currentSection + 1;
+                if (nextSection <= 4) {
+                    setCurrentSection(nextSection);
+                    setCurrentPage(`section-${nextSection}`);
+                } else {
+                    setCurrentPage('end');
+                }
+            };
+
+            if (currentPage === 'start') {
+                return <div className="app-container"><StartPage onNext={handleStart} /></div>;
+            }
+
+            if (currentPage.startsWith('section-')) {
+                const sectionNum = parseInt(currentPage.split('-')[1]);
+                const section = journeyData.sections[sectionNum - 1];
+                return (
+                    <div className="app-container">
+                        <SectionPage 
+                            key={`section-${sectionNum}`}
+                            section={section}
+                            onNext={handleNextSection}
+                            progress={progressMap[currentPage]}
+                        />
+                    </div>
+                );
+            }
+
+            if (currentPage === 'end') {
+                return <div className="app-container"><EndPage /></div>;
+            }
+
+            return null;
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
