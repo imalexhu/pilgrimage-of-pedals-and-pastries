@@ -180,6 +180,15 @@
             color: var(--text-light);
             animation: fadeInUp 1s ease-out 0.3s both;
         }
+        .hero-time {
+            font-size: 16px;
+            line-height: 1.8;
+            max-width: 400px;
+            margin: 0 auto 40px;
+            font-style: italic;
+            color: var(--text-light);
+            animation: fadeInUp 1s ease-out 0.5s both;
+        }
 
         @keyframes fadeInDown {
             from {
@@ -534,6 +543,9 @@
             }
             .hero-subtitle {
                 font-size: 16px;
+            }
+            .hero-time{
+                font-size: 14px;
             }
         }
     </style>
@@ -920,6 +932,9 @@
                         <h1 className="hero-title">🚴‍♀️ Pilgrimage of Pedals, Petals & Pasteries 💐 </h1>
                         <p className="hero-subtitle">
                             "A cute, unexpectedly well planned date, schemed up by a true yearner that only you know"
+                        </p>
+                        <p className="hero-time">
+                            12pm-6:30pm 23rd November 2025
                         </p>
                         <button className="btn" onClick={scrollToMap}>
                             NEXT →
